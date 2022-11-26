@@ -1,0 +1,109 @@
+# PLEASE WRITE THE GITHUB URL BELOW!
+#
+
+import sys
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import svm
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+def load_dataset(dataset_path):
+	# To-Do: Implement this function
+	# 입력 받은 path의 파일을 load함
+	return pd.read_csv(dataset_path)
+
+def dataset_stat(dataset_df):	
+	# To-Do: Implement this function
+	# n_feats의 경우
+	# shape 함수를 통해 전체 열의 개수를 찾고 feature를 제외시키기 위해 1를 빼줌
+	# n_class0과 n_class1의 경우
+	# df.loc를 이용해 dataset_df의 행들의 target 값을 조회한 뒤,
+	# len으로 그 개수를 셈
+	n_feats = dataset_df.shape[1]-1
+	n_class0 = len(dataset_df.loc[dataset_df['target'] == 0])
+	n_class1 = len(dataset_df.loc[dataset_df['target'] == 1])
+	return n_feats, n_class0, n_class1
+
+def split_dataset(dataset_df, testset_size):
+	# To-Do: Implement this function
+	# target 열을 제외한 value들은 data에, target 열의 value는 target에 입력한 후,
+	# train_test_split 함수를 이용해 데이터셋을 분리
+	data = dataset_df.drop(columns=['target']).values
+	target = dataset_df['target'].values
+	return train_test_split(data, target, test_size=testset_size)
+
+def decision_tree_train_test(x_train, x_test, y_train, y_test):
+	# To-Do: Implement this function
+	# x_train과 y_train을 통해 모델을 학습시킴(fit)
+	dt_clf = DecisionTreeClassifier()
+	dt_clf.fit(x_train, y_train)
+	pred = dt_clf.predict(x_test)
+
+	acc = accuracy_score(pred, y_test)
+	prec = precision_score(pred, y_test)
+	recall = recall_score(pred, y_test)
+
+	return acc, prec, recall
+
+def random_forest_train_test(x_train, x_test, y_train, y_test):
+	# To-Do: Implement this function
+	# x_train과 y_train을 통해 모델을 학습시킴(fit)
+	rd_clf = RandomForestClassifier()
+	rd_clf.fit(x_train, y_train)
+	pred = rd_clf.predict(x_test)
+
+	acc = accuracy_score(pred, y_test)
+	prec = precision_score(pred, y_test)
+	recall = recall_score(pred, y_test)
+
+	return acc, prec, recall
+
+def svm_train_test(x_train, x_test, y_train, y_test):
+	# To-Do: Implement this function
+	# x_train과 y_train을 통해 모델을 학습시킴(fit)
+	pipeline = make_pipeline(StandardScaler(), svm.SVC())
+	pipeline.fit(x_train, y_train)
+	pred = pipeline.predict(x_test)
+
+	acc = accuracy_score(pred, y_test)
+	prec = precision_score(pred, y_test)
+	recall = recall_score(pred, y_test)
+
+	return acc, prec, recall
+
+def print_performances(acc, prec, recall):
+	#Do not modify this function!
+	print ("Accuracy: ", acc)
+	print ("Precision: ", prec)
+	print ("Recall: ", recall)
+
+if __name__ == '__main__':
+	#Do not modify the main script!
+	data_path = sys.argv[1]
+	data_df = load_dataset(data_path)
+
+	n_feats, n_class0, n_class1 = dataset_stat(data_df)
+	print ("Number of features: ", n_feats)
+	print ("Number of class 0 data entries: ", n_class0)
+	print ("Number of class 1 data entries: ", n_class1)
+
+	print ("\nSplitting the dataset with the test size of ", float(sys.argv[2]))
+	x_train, x_test, y_train, y_test = split_dataset(data_df, float(sys.argv[2]))
+
+	acc, prec, recall = decision_tree_train_test(x_train, x_test, y_train, y_test)
+	print ("\nDecision Tree Performances")
+	print_performances(acc, prec, recall)
+
+	acc, prec, recall = random_forest_train_test(x_train, x_test, y_train, y_test)
+	print ("\nRandom Forest Performances")
+	print_performances(acc, prec, recall)
+
+	acc, prec, recall = svm_train_test(x_train, x_test, y_train, y_test)
+	print ("\nSVM Performances")
+	print_performances(acc, prec, recall)
